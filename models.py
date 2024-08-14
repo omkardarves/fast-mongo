@@ -1,10 +1,16 @@
 # models.py
 from pydantic import BaseModel
+from beanie import Document
 
-class Todo(BaseModel):
+
+class TodoBase(BaseModel):
     name: str
     description: str
     complete: bool
 
-class TodoInDB(Todo):
+class TodoInDB(TodoBase):
     id: str
+
+class Todo(Document, TodoBase):
+    class Settings:
+        collection = "todo_collection"
