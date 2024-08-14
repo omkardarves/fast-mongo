@@ -6,19 +6,21 @@ from beanie import init_beanie
 import motor.motor_asyncio
 from migration_runner import run_migrations
 from models import MigrationRecord, Todo, TodoBase, TodoInDB, Task, TaskBase, TaskInDB
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="Fast Mongo with Beanie")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init()
+    await run_migrations()
+    yield
+
+app = FastAPI(title="Fast Mongo with Beanie",lifespan=lifespan)
 
 # Database setup
 async def init():
     client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://localhost:27017')
     database = client.fast_test_beanie
     await init_beanie(database, document_models=[Todo, Task, MigrationRecord])
-
-@app.on_event("startup")
-async def on_startup():
-    await init()
-    await run_migrations()
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
