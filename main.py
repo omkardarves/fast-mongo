@@ -39,7 +39,7 @@ async def get_todos():
 
 @app.post("/todo/", tags=["Todo"], response_model=TodoInDB)
 async def post_todos(todo: TodoBase):
-    todo_doc = Todo(**todo.dict())
+    todo_doc = Todo(**todo.model_dump())
     await todo_doc.insert()
     return todo_doc.model_dump() | {"id": str(todo_doc.id)}
 
@@ -49,7 +49,7 @@ async def put_todos(id: str, todo: TodoBase):
     if todo_doc is None:
         raise HTTPException(status_code=404, detail="Todo not found")
     # Convert the model fields to a dict, but exclude '_id'
-    update_data = todo.dict(exclude_unset=True)
+    update_data = todo.model_dump(exclude_unset=True)
     await todo_doc.update({"$set": update_data})
     return todo_doc.model_dump() | {"id": str(todo_doc.id)}
 
@@ -68,7 +68,7 @@ async def get_tasks():
 
 @app.post("/task/", tags = ["Task"], response_model=TaskInDB)
 async def post_tasks(task: TaskBase):
-    task_doc = Task(**task.dict())
+    task_doc = Task(**task.model_dump())
     await task_doc.insert()
     return task_doc.model_dump() | {"id": str(task_doc.id)}
 
@@ -77,7 +77,7 @@ async def put_tasks(id: str, task: TaskBase):
     task_doc = await Task.get(id)
     if task_doc is None:
         raise HTTPException(status_code=404, detail="Task not found")
-    update_data = task.dict(exclude_unset=True)
+    update_data = task.model_dump(exclude_unset=True)
     await task_doc.update({"$set": update_data})
     return task_doc.model_dump() | {"id": str(task_doc.id)}
 
