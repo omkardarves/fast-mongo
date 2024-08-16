@@ -1,3 +1,4 @@
 env
 *.pyc
 .better-commits.json
+.env

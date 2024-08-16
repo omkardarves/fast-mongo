@@ -31,7 +31,7 @@ async def run_migrations():
             continue
         
         # Record the migration
-        migration_record = MigrationRecord(name=migration_name, applied_at=datetime.now(datetime.UTC))
+        migration_record = MigrationRecord(name=migration_name, applied_at=datetime.now())
         await migration_record.insert()
 
         print(f"Migration {migration_name} applied successfully.")
