@@ -1,0 +1,2 @@
+fastapi[all]==0.112.0
+beanie==1.26.0

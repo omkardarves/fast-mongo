@@ -1,0 +1,21 @@
+version: "3.4"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: '${FASTAPI_CONTAINER_NAME}'
+    ports:
+      - "${HOST_PORT}:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MONGODB_URL=${MONGODB_URL}
+    env_file:
+      - .env
+#     networks:
+#       - docker_network
+
+# networks:
+#   docker_network:
+#     driver: bridge

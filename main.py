@@ -22,8 +22,8 @@ app = FastAPI(title="Fast Mongo with Beanie",lifespan=lifespan)
 
 # Database setup
 async def init():
-    db_url = os.getenv('db_url','')
-    client = motor.motor_asyncio.AsyncIOMotorClient(db_url)
+    MONGODB_URL = os.getenv('MONGODB_URL','')
+    client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
     database = client.fast_test_beanie
     await init_beanie(database, document_models=[Todo, Task, MigrationRecord])
 
