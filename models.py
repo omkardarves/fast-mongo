@@ -41,3 +41,21 @@ class TaskInDB(TaskBase):
 class Task(Document, TaskBase):
     class Settings:
         collection = "task_collection"
+
+class ApiLog(Document):
+    req_body: str
+    res_body: str
+    path_params: str
+    query_params: str
+    headers: str
+    api_url: str
+    api_title: str
+    traceback: Optional[str] = None
+    personalized_message: Optional[str] = None
+    client_ip: str
+    status_code: int
+    req_time: str
+    status: str  # "Success" or "Failure"
+
+    class Settings:
+        collection = "api_logs"

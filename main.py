@@ -5,10 +5,17 @@ from fastapi.responses import HTMLResponse
 from typing import List
 from beanie import init_beanie
 import motor.motor_asyncio
+from middlewares import LogAPIMiddleware
 from migration_runner import run_migrations
-from models import MigrationRecord, Todo, TodoBase, TodoInDB, Task, TaskBase, TaskInDB
+from models import ApiLog, MigrationRecord, Todo, TodoBase, TodoInDB, Task, TaskBase, TaskInDB
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from fastapi.exceptions import RequestValidationError
+from exceptions import (
+    request_validation_exception_handler,
+    http_exception_handler,
+    unhandled_exception_handler,
+)
 
 load_dotenv(".env")
 
@@ -20,12 +27,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Fast Mongo with Beanie",lifespan=lifespan)
 
+app.add_middleware(LogAPIMiddleware)
+app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)
 # Database setup
 async def init():
     MONGODB_URL = os.getenv('MONGODB_URL','')
     client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
     database = client.fast_test_beanie
-    await init_beanie(database, document_models=[Todo, Task, MigrationRecord])
+    await init_beanie(database, document_models=[Todo, Task, MigrationRecord, ApiLog])
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
@@ -38,7 +49,8 @@ async def get_todos():
     return [todo.model_dump() | {"id": str(todo.id)} for todo in todos]
 
 @app.post("/todo/", tags=["Todo"], response_model=TodoInDB)
-async def post_todos(todo: TodoBase):
+async def post_todos(request: Request, todo: TodoBase):
+    request.state.pydantic_basemodel = todo
     todo_doc = Todo(**todo.model_dump())
     await todo_doc.insert()
     return todo_doc.model_dump() | {"id": str(todo_doc.id)}
