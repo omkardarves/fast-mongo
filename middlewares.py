@@ -56,5 +56,13 @@ class LogAPIMiddleware(BaseHTTPMiddleware):
                 res_body={"response": response_body.decode('utf-8')},
                 function_name=str(request.url),
             )
+        elif response.status_code == 405:
+            await log_api_response(
+                request=request,
+                req_body=req_body,
+                status_code=response.status_code,
+                res_body={"detail":"Method Not Allowed"},
+                function_name=str(request.url),
+            )
 
         return response
