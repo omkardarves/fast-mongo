@@ -56,6 +56,7 @@ async def log_api_response(
         data = {
             "req_body": str(req_body),
             "res_body": str(res_body),
+            "method": str(request.method),
             "path_params": str(request.path_params),
             "query_params": str(request.query_params),
             "headers": dict(request.headers),

@@ -6,8 +6,18 @@ import io
 
 class LogAPIMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # Read and store the request body
+        req_body_bytes = await request.body()
+        req_body = req_body_bytes.decode('utf-8')
+        
+        # Recreate the request object with the original body so it can be consumed by the route handler
+        request = Request(
+            scope=request.scope,
+            receive=lambda: io.BytesIO(req_body_bytes).read(),
+            send=request._send
+        )
+
         # Process the request and get the response
-        pydantic_basemodel = str(dict(getattr(request.state, "pydantic_basemodel", {})))
         response = await call_next(request)
 
         if response.status_code == 200:
@@ -41,6 +51,7 @@ class LogAPIMiddleware(BaseHTTPMiddleware):
             # Log the successful response
             await log_api_response(
                 request=request,
+                req_body=req_body,
                 status_code=response.status_code,
                 res_body={"response": response_body.decode('utf-8')},
                 function_name=str(request.url),

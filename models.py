@@ -45,6 +45,7 @@ class Task(Document, TaskBase):
 class ApiLog(Document):
     req_body: str
     res_body: str
+    method: str
     path_params: str
     query_params: str
     headers: str
